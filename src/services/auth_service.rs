@@ -115,10 +115,12 @@ impl AuthService for AuthServiceImpl {
 
         let tokens = result.unwrap();
 
-        match self.save_tokens(&user_id, &token_id, &tokens).await {
-          Ok(_) => Ok(tokens),
-          Err(_) => Err(Error::InternalServerError("Error while saving tokens.".to_string()))
+        let result = self.save_tokens(&user_id, &token_id, &tokens).await;
+        if result.is_err() {
+          return Err(Error::InternalServerError("Error while saving tokens.".to_string()));
         }
+
+        Ok(tokens)
       }
       Err(_) => Err(Error::InternalServerError("User not found.".to_string())),
       _ => Err(Error::InternalServerError("An error occurred.".to_string()))
