@@ -1,0 +1,23 @@
+[package]
+name = "rust-blog"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dotenvy = "0.15"
+uuid = {version = "1.6.1", features = ["v4", "serde"]}
+redis = {version = "0.24.0", features = ["tokio-comp", "tokio-native-tls-comp"]}
+rust-s3 = "0.33.0"
+sqlx = { version = "0.7", features = [ "runtime-tokio", "runtime-tokio-native-tls", "macros", "postgres", "uuid", "chrono" ] }
+tokio = { version = "1", features = ["full"] }
+chrono = { version = "0.4.31", features = ["serde"] }
+async-trait = "0.1.77"
+serde = "1.0.194"
+jsonwebtoken = "9.2.0"
+bcrypt = "0.15.0"
+derive_more = "0.99.1"
+reqwest = { version = "0.11", features = ["json"] }
+axum = { version = "0.7.4", features = ["multipart"] }
+tower = { version = "0.4", features = ["util"] }
+tower-http = { version = "0.5.0", features = ["fs", "trace"] }
+

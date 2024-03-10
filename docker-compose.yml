@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+
+  postgres:
+    image: postgres
+    ports:
+      - "8100:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: rustblog
+      POSTGRES_USER: rustblog
+      POSTGRES_PASSWORD: rustblog
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "8300:6379"
+
+  redis-gui:
+    image: rediscommander/redis-commander
+    depends_on:
+      - redis
+    ports:
+      - 8310:8081
+    environment:
+      REDIS_HOSTS: redis
+
+  minio:
+    image: minio/minio
+    ports:
+      - "8400:9000"
+      - "8401:9001"
+    environment:
+      MINIO_ACCESS_KEY: minio_access_key
+      MINIO_SECRET_KEY: minio_secret_key
+    command: server --address 0.0.0.0:9000  --console-address :9001 /data
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 minio_access_key minio_secret_key;
+      /usr/bin/mc mb myminio/rustblog;
+      /usr/bin/mc anonymous set public myminio/rustblog;
+      exit 0;
+      "

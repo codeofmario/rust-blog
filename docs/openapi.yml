@@ -1,0 +1,359 @@
+openapi: 3.0.3
+info:
+  title: RustBlog API
+  description: The API that power the RustBlog.
+  version: 0.0.1
+servers:
+  - url: http://localhost:8000/api
+    description: Local development server
+tags:
+  - name: auth
+    description: Authentication management.
+  - name: user
+    description: Users management.
+  - name: post
+    description: Posts management.
+  - name: comment
+    description: Comments management
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login
+      security: []
+      description: Login a user.
+      operationId: loginAuth
+      requestBody:
+        description: Login a user.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestDto'
+      responses:
+        '200':
+          description: Auth tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokensResponseDto'
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logout
+      description: Logout the current user.
+      operationId: logoutAuth
+      responses:
+        '204':
+          description: A post object
+  /auth/token/refresh:
+    post:
+      tags:
+        - auth
+      summary: Refresh auth token
+      security: []
+      description: Refresh the auth token for the current user.
+      operationId: refreshTokenAuth
+      requestBody:
+        description: Refresh the auth token for the current user.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Auth tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokensResponseDto'
+  /posts:
+    get:
+      tags:
+        - post
+      summary: List of posts
+      description: Return list od created post.
+      operationId: getAllPost
+      responses:
+        '200':
+          description: A JSON array of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostResponseDto'
+    post:
+      tags:
+        - post
+      summary: Create post
+      description: Create a new post.
+      operationId: createPost
+      requestBody:
+        description: Create a new post.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRequestDto'
+      responses:
+        '200':
+          description: A post object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponseDto'
+  /posts/{id}:
+    get:
+      tags:
+        - post
+      summary: Find post by ID
+      description: Returns a single post by the given id.
+      operationId: getOnePost
+      parameters:
+        - name: id
+          in: path
+          description: Post id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponseDto'
+    put:
+      tags:
+        - post
+      summary: Update post
+      description: Update a post.
+      operationId: updatePost
+      parameters:
+        - name: id
+          in: path
+          description: Post id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update a post.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRequestDto'
+      responses:
+        default:
+          description: successful operation
+    delete:
+      tags:
+        - post
+      summary: Delete a post
+      description: Delete a post.
+      operationId: deletePost
+      parameters:
+        - name: id
+          in: path
+          description: Post id
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid post value
+  /posts/{id}/image:
+    put:
+      tags:
+        - post
+      summary: Update post image
+      description: Update a post image.
+      operationId: addPostImage
+      parameters:
+        - name: id
+          in: path
+          description: Post id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update a post.
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        default:
+          description: successful operation
+  /posts/{postId}/comments:
+    get:
+      tags:
+        - comment
+      summary: Find comments for post
+      description: Returns a single post by the given id.
+      operationId: getCommentsForPost
+      parameters:
+        - name: postId
+          in: path
+          description: Post id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/CommentResponseDto'
+    post:
+      tags:
+        - comment
+      summary: Create comment
+      description: Create a new comment.
+      operationId: createComment
+      parameters:
+        - name: postId
+          in: path
+          description: Post id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Create a new comment.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequestDto'
+      responses:
+        '200':
+          description: A comment object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponseDto'
+  /posts/{postId}/comments/{commentId}:
+    put:
+      tags:
+        - comment
+      summary: Update comment
+      description: Update a comment.
+      operationId: updateComment
+      parameters:
+        - name: postId
+          in: path
+          description: Post id
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          description: Comment id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update a comment.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequestDto'
+      responses:
+        '200':
+          description: A comment object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponseDto'
+components:
+  schemas:
+    # === REQUEST ===
+    LoginRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example: john@rustblog.com
+        password:
+          type: string
+          example: password
+    PostRequestDto:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+    CommentCreateRequestDto:
+      type: object
+      properties:
+        body:
+          type: string
+        postId:
+          type: string
+    CommentRequestDto:
+      type: object
+      properties:
+        body:
+          type: string
+        postId:
+          type: string
+
+    # === RESPONSE ===
+    TokensResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    PostResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        userId:
+          type: string
+        updatedAt:
+          type: integer
+          format: int64
+        createdAt:
+          type: integer
+          format: int64
+    CommentResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        body:
+          type: string
+        userId:
+          type: string
+        postId:
+          type: string
+        updatedAt:
+          type: integer
+          format: int64
+        createdAt:
+          type: integer
+          format: int64
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: [ ]
